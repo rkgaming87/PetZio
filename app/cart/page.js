@@ -84,9 +84,9 @@ export default function CartPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xl font-bold" style={{ color: '#FF8C42' }}>
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ₹{(item.price * item.quantity).toFixed(2)}
                           </p>
-                          <p className="text-sm text-gray-600">${item.price} each</p>
+                          <p className="text-sm text-gray-600">₹{item.price} each</p>
                         </div>
                       </div>
 
@@ -140,11 +140,11 @@ export default function CartPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                    <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tax (8%)</span>
-                    <span className="font-semibold">${tax.toFixed(2)}</span>
+                    <span className="font-semibold">₹{tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
@@ -152,21 +152,21 @@ export default function CartPage() {
                       {shipping === 0 ? (
                         <span className="text-green-600">FREE</span>
                       ) : (
-                        `$${shipping.toFixed(2)}`
+                        `₹${shipping.toFixed(2)}`
                       )}
                     </span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount</span>
-                      <span className="font-semibold">-${discount.toFixed(2)}</span>
+                      <span className="font-semibold">-₹{discount.toFixed(2)}</span>
                     </div>
                   )}
 
                   {shipping > 0 && (
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm">
                       <p className="text-blue-800">
-                        Add ${(50 - subtotal).toFixed(2)} more for FREE shipping!
+                        Add ₹{(50 - subtotal).toFixed(2)} more for FREE shipping!
                       </p>
                     </div>
                   )}
@@ -175,7 +175,7 @@ export default function CartPage() {
 
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span style={{ color: '#FF8C42' }}>${total.toFixed(2)}</span>
+                    <span style={{ color: '#FF8C42' }}>₹{total.toFixed(2)}</span>
                   </div>
 
                   {/* Promo Code */}

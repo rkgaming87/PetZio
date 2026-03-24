@@ -107,7 +107,7 @@ export default function DashboardPage() {
                                   {order.status.toUpperCase()}
                                 </Badge>
                                 <p className="text-lg font-bold mt-2" style={{ color: '#FF8C42' }}>
-                                  ${order.total.toFixed(2)}
+                                  ₹{order.total.toFixed(2)}
                                 </p>
                               </div>
                             </div>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                                     <p className="font-medium">{product?.name}</p>
                                     <p className="text-sm text-gray-600">Quantity: {product?.quantity}</p>
                                   </div>
-                                  <p className="font-semibold">${(product?.price * product?.quantity).toFixed(2)}</p>
+                                  <p className="font-semibold">₹{(product?.price * product?.quantity).toFixed(2)}</p>
                                 </div>
                               ))}
                             </div>

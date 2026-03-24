@@ -100,7 +100,7 @@ export default function VendorDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Total Revenue</p>
                   <p className="text-3xl font-bold" style={{ color: '#FF8C42' }}>
-                    ${totalRevenue.toFixed(0)}
+                    ₹{totalRevenue.toFixed(0)}
                   </p>
                 </div>
                 <DollarSign className="h-10 w-10 text-green-500" />
@@ -220,7 +220,7 @@ export default function VendorDashboard() {
                             </div>
                           </td>
                           <td className="p-3 text-sm">{product.sku}</td>
-                          <td className="p-3 font-semibold">${product.price}</td>
+                          <td className="p-3 font-semibold">₹{product.price}</td>
                           <td className="p-3">
                             <span className={product.stock < 10 ? 'text-red-600 font-semibold' : ''}>
                               {product.stock} units
@@ -271,7 +271,7 @@ export default function VendorDashboard() {
                               {order.status.toUpperCase()}
                             </Badge>
                             <p className="text-lg font-bold mt-1" style={{ color: '#FF8C42' }}>
-                              ${order.total.toFixed(2)}
+                              ₹{order.total.toFixed(2)}
                             </p>
                           </div>
                         </div>

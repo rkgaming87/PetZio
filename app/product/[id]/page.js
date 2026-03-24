@@ -143,7 +143,7 @@ export default function ProductDetailsPage() {
             <div className="mb-6">
               <div className="flex items-baseline space-x-2 mb-2">
                 <span className="text-4xl font-bold" style={{ color: '#FF8C42' }}>
-                  ${product.price}
+                  ₹{product.price}
                 </span>
               </div>
               {product.stock > 0 ? (

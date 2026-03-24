@@ -60,7 +60,7 @@ export default function ProductCard({ product }) {
         
         <CardFooter className="p-4 pt-0 flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold" style={{ color: '#FF8C42' }}>${product.price}</p>
+            <p className="text-2xl font-bold" style={{ color: '#FF8C42' }}>₹{product.price}</p>
           </div>
           <Button
             size="sm"

@@ -167,8 +167,8 @@ export function ShopPage() {
                           className="w-full"
                         />
                         <div className="flex items-center justify-between text-sm">
-                          <span className="font-semibold">${priceRange[0]}</span>
-                          <span className="font-semibold">${priceRange[1]}</span>
+                          <span className="font-semibold">₹{priceRange[0]}</span>
+                          <span className="font-semibold">₹{priceRange[1]}</span>
                         </div>
                       </div>
                     </AccordionContent>

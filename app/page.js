@@ -75,7 +75,7 @@ export default function HomePage() {
               <Truck className="h-10 w-10" style={{ color: '#4A90E2' }} />
               <div>
                 <h3 className="font-semibold text-lg">Fast Delivery</h3>
-                <p className="text-gray-600 text-sm">Free shipping on orders over $50</p>
+                <p className="text-gray-600 text-sm">Free shipping on orders over ₹50</p>
               </div>
             </div>
             <div className="flex items-center justify-center space-x-4">

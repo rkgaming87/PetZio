@@ -334,7 +334,7 @@ export default function CheckoutPage() {
                           <p className="text-sm font-medium line-clamp-1">{item.name}</p>
                           <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
                           <p className="text-sm font-semibold" style={{ color: '#FF8C42' }}>
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ₹{(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -346,11 +346,11 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                      <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Tax</span>
-                      <span className="font-semibold">${tax.toFixed(2)}</span>
+                      <span className="font-semibold">₹{tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Shipping</span>
@@ -358,7 +358,7 @@ export default function CheckoutPage() {
                         {shipping === 0 ? (
                           <span className="text-green-600">FREE</span>
                         ) : (
-                          `$${shipping.toFixed(2)}`
+                          `₹${shipping.toFixed(2)}`
                         )}
                       </span>
                     </div>
@@ -368,7 +368,7 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span style={{ color: '#FF8C42' }}>${total.toFixed(2)}</span>
+                    <span style={{ color: '#FF8C42' }}>₹{total.toFixed(2)}</span>
                   </div>
                 </CardContent>
               </Card>
