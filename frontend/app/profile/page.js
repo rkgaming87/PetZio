@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { User, Mail, Phone, MapPin, Package, Settings, LogOut, Camera } from 'lucide-react';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -73,8 +74,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
+      <Navbar />
+      <div className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -252,6 +255,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </motion.div>
+      </div>
       </div>
     </div>
   );

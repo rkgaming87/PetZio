@@ -80,9 +80,10 @@ export default function SignInPage() {
         address: 'No Address Provided', // Default placeholder
       });
       
-      toast.success('Account created! Please sign in.');
-      setSignInForm({ email: signUpForm.email, password: signUpForm.password });
-      document.querySelector('[value="signin"]')?.click();
+      const data = response.data;
+      localStorage.setItem('petzio_token', data.token);
+      toast.success('Account created successfully! Welcome to PetZio!');
+      router.push('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to register');
       toast.error('Failed to create account');

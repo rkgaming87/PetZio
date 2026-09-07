@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
 import { Search, ShoppingCart, User, Menu, X, Package, LayoutDashboard, LogOut } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { Button } from '@/components/ui/button';
@@ -16,12 +15,33 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const router = useRouter();
   const { getCartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check auth status on mount
+    const checkAuth = () => {
+      const token = localStorage.getItem('petzio_token');
+      setIsAuthenticated(!!token);
+    };
+    
+    checkAuth();
+    // Optional: listen to storage changes for cross-tab sync
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('petzio_token');
+    setIsAuthenticated(false);
+    router.push('/');
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -75,51 +95,31 @@ export default function Navbar() {
             </Link>
 
             {/* User Menu */}
-            {session ? (
+            {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2">
                     <User className="h-5 w-5" />
-                    <span className="hidden lg:inline">{session.user?.name || 'Account'}</span>
+                    <span className="hidden lg:inline">My Account</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {session.user?.role === 'customer' && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="cursor-pointer">
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="cursor-pointer">
-                          <Package className="mr-2 h-4 w-4" />
-                          My Orders
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  {session.user?.role === 'vendor' && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/vendor" className="cursor-pointer">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Vendor Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  {session.user?.role === 'admin' && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin" className="cursor-pointer">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Admin Panel
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                      <Package className="mr-2 h-4 w-4" />
+                      My Orders
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-red-600">
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
                   </DropdownMenuItem>
@@ -171,12 +171,12 @@ export default function Navbar() {
                 <Badge style={{ backgroundColor: '#FF8C42' }}>{getCartCount()}</Badge>
               )}
             </Link>
-            {session ? (
+            {isAuthenticated ? (
               <>
-                <Link href="/dashboard" className="block py-2" onClick={() => setMobileMenuOpen(false)}>
-                  Dashboard
+                <Link href="/profile" className="block py-2" onClick={() => setMobileMenuOpen(false)}>
+                  Profile
                 </Link>
-                <button onClick={() => signOut()} className="block py-2 text-left w-full text-red-600">
+                <button onClick={handleSignOut} className="block py-2 text-left w-full text-red-600">
                   Sign Out
                 </button>
               </>
