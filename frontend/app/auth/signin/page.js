@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '@/lib/api';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -37,23 +37,17 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn('credentials', {
+      const response = await api.post('/auth/login', {
         email: signInForm.email,
-        password: signInForm.password,
-        redirect: false
+        password: signInForm.password
       });
 
-      if (result?.error) {
-        setError('Invalid email or password');
-        toast.error('Invalid email or password');
-      } else {
-        toast.success('Successfully signed in!');
-        // Redirect based on role would happen here
-        router.push('/');
-        router.refresh();
-      }
+      const data = response.data;
+      localStorage.setItem('petzio_token', data.token);
+      toast.success('Successfully signed in!');
+      router.push('/');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(err.response?.data?.message || 'Invalid email or password');
       toast.error('An error occurred');
     } finally {
       setIsLoading(false);
@@ -76,11 +70,23 @@ export default function SignInPage() {
       return;
     }
 
-    // Mock signup - in real app would create user
-    toast.success('Account created! Please sign in.');
-    setSignInForm({ email: signUpForm.email, password: signUpForm.password });
-    // Switch to sign in tab
-    document.querySelector('[value="signin"]')?.click();
+    try {
+      const response = await api.post('/auth/register', {
+        username: signUpForm.name,
+        email: signUpForm.email,
+        password: signUpForm.password,
+        role: accountType === 'vendor' ? 'vendor' : 'user',
+        cont_num: '0000000000', // Default placeholder
+        address: 'No Address Provided', // Default placeholder
+      });
+      
+      toast.success('Account created! Please sign in.');
+      setSignInForm({ email: signUpForm.email, password: signUpForm.password });
+      document.querySelector('[value="signin"]')?.click();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to register');
+      toast.error('Failed to create account');
+    }
   };
 
   return (

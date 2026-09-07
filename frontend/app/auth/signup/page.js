@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { PawPrint, Mail, Lock, User, Phone, MapPin, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import api from '@/lib/api';
+
 export default function SignupPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -18,15 +20,24 @@ export default function SignupPage() {
     address: '',
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate signup request
-    toast.success('Account created successfully! Welcome to PetZio.');
-    router.push('/auth/signin');
+    setIsLoading(true);
+    try {
+      const response = await api.post('/auth/register', formData);
+      toast.success('Account created successfully! Welcome to PetZio.');
+      router.push('/auth/signin');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -195,9 +206,10 @@ export default function SignupPage() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-neutral-900 transition-all duration-200"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-neutral-900 transition-all duration-200 disabled:opacity-70"
               >
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
             </div>
           </form>

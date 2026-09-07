@@ -16,7 +16,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { X } from 'lucide-react';
-import { products, categories, brands, vendors } from '@/lib/mockData';
+import { categories, brands, vendors } from '@/lib/mockData';
+import api from '@/lib/api';
 
 export default function ShopMain() {
   return (
@@ -31,11 +32,36 @@ export function ShopPage() {
   const searchQuery = searchParams.get('search') || '';
   const categoryParam = searchParams.get('category') || '';
 
+  const [products, setProducts] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState(categoryParam ? [categoryParam] : []);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedVendors, setSelectedVendors] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [searchTerm, setSearchTerm] = useState(searchQuery);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/products');
+      // Map backend products to frontend expected structure
+      const mappedProducts = response.data.map(p => ({
+        id: p._id,
+        name: p.pro_name,
+        price: p.price,
+        image: p.image,
+        category: p.category,
+        brand: p.ven_id?.shop_name || 'Unknown Vendor',
+        vendorId: p.ven_id?._id || 'unknown',
+        description: 'Quality pet product'
+      }));
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('Failed to load products', error);
+    }
+  };
 
   useEffect(() => {
     if (categoryParam) {
@@ -56,7 +82,7 @@ export function ShopPage() {
         return false;
       }
 
-      // Brand filter
+      // Brand filter (actually mapped to vendor shop_name for now)
       if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
         return false;
       }
@@ -84,7 +110,7 @@ export function ShopPage() {
 
       return true;
     });
-  }, [selectedCategories, selectedBrands, selectedVendors, priceRange, searchTerm]);
+  }, [products, selectedCategories, selectedBrands, selectedVendors, priceRange, searchTerm]);
 
   const clearAllFilters = () => {
     setSelectedCategories([]);

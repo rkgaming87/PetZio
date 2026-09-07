@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Package, Truck, CheckCircle2, MapPin } from 'lucide-react';
+import api from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function TrackOrderPage() {
@@ -10,7 +11,7 @@ export default function TrackOrderPage() {
   const [isTracking, setIsTracking] = useState(false);
   const [trackingData, setTrackingData] = useState(null);
 
-  const handleTrack = (e) => {
+  const handleTrack = async (e) => {
     e.preventDefault();
     if (!orderId.trim()) {
       toast.error('Please enter a valid Order ID');
@@ -18,27 +19,45 @@ export default function TrackOrderPage() {
     }
     
     setIsTracking(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      const { order, delivery } = response.data;
+      
+      const statusMapping = {
+        'processing': 0,
+        'shipped': 1,
+        'out_for_delivery': 2,
+        'delivered': 3
+      };
+      
+      const currentStepIdx = statusMapping[delivery?.del_status] !== undefined ? statusMapping[delivery?.del_status] : 0;
+      
+      const allSteps = [
+        { id: 1, name: 'Processing', icon: Package },
+        { id: 2, name: 'Shipped', icon: Truck },
+        { id: 3, name: 'Out for Delivery', icon: MapPin },
+        { id: 4, name: 'Delivered', icon: CheckCircle2 }
+      ];
+
+      const steps = allSteps.map((step, idx) => ({
+        ...step,
+        completed: idx <= currentStepIdx,
+        date: idx === currentStepIdx && delivery?.del_date ? new Date(delivery.del_date).toLocaleDateString() : (idx < currentStepIdx ? 'Completed' : 'Pending')
+      }));
+
       setTrackingData({
-        id: orderId,
-        status: 'shipped', // processing, shipped, out_for_delivery, delivered
-        estimatedDelivery: 'Oct 12, 2026',
-        items: [
-          { name: 'Premium Dog Food', qty: 2 },
-          { name: 'Squeaky Toy', qty: 1 }
-        ],
-        steps: [
-          { id: 1, name: 'Order Placed', completed: true, date: 'Oct 8, 10:00 AM', icon: Package },
-          { id: 2, name: 'Processing', completed: true, date: 'Oct 9, 2:30 PM', icon: MapPin },
-          { id: 3, name: 'Shipped', completed: true, date: 'Oct 10, 8:15 AM', icon: Truck },
-          { id: 4, name: 'Out for Delivery', completed: false, date: 'Pending', icon: MapPin },
-          { id: 5, name: 'Delivered', completed: false, date: 'Pending', icon: CheckCircle2 },
-        ]
+        id: order._id.substring(order._id.length - 8).toUpperCase(),
+        status: delivery?.del_status || 'processing',
+        estimatedDelivery: delivery?.del_date ? new Date(delivery.del_date).toLocaleDateString() : 'Pending',
+        steps: steps
       });
       setIsTracking(false);
       toast.success('Tracking information retrieved!');
-    }, 1000);
+    } catch (error) {
+      setIsTracking(false);
+      toast.error(error.response?.data?.message || 'Order not found. Please check your ID.');
+      setTrackingData(null);
+    }
   };
 
   return (

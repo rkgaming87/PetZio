@@ -1,29 +1,75 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { User, Mail, Phone, MapPin, Package, Settings, LogOut, Camera } from 'lucide-react';
+import api from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
+  const [orders, setOrders] = useState([]);
   const [profileData, setProfileData] = useState({
-    username: 'JohnDoePetLover',
-    email: 'johndoe@example.com',
-    phone: '+1 234 567 8900',
-    address: '123 Pet Street, Bark City, Doggo State 12345',
+    username: '',
+    email: '',
+    phone: '',
+    address: '',
   });
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    fetchProfile();
+    fetchOrders();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get('/users/profile');
+      setProfileData({
+        username: response.data.username || '',
+        email: response.data.email || '',
+        phone: response.data.cont_num || '',
+        address: response.data.address || '',
+      });
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.error('Please log in first');
+        router.push('/auth/signin');
+      }
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await api.get('/orders/myorders');
+      setOrders(response.data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setIsEditing(false);
-    toast.success('Profile updated successfully!');
+    try {
+      await api.put('/users/profile', {
+        username: profileData.username,
+        email: profileData.email,
+        cont_num: profileData.phone,
+        address: profileData.address
+      });
+      setIsEditing(false);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('petzio_token');
     toast.info('Logged out successfully.');
-    // handle router redirect in real app
+    router.push('/auth/signin');
   };
 
   return (
@@ -40,7 +86,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <div className="w-24 h-24 rounded-full bg-white dark:bg-neutral-800 p-1">
                   <div className="w-full h-full rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                    {profileData.username.charAt(0)}
+                    {profileData.username.charAt(0)?.toUpperCase()}
                   </div>
                 </div>
                 <button className="absolute bottom-0 right-0 bg-white dark:bg-neutral-800 p-1.5 rounded-full shadow-lg border border-neutral-200 dark:border-neutral-700 hover:text-indigo-600 transition-colors">
@@ -53,7 +99,7 @@ export default function ProfilePage() {
           <div className="pt-16 pb-8 px-8">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">{profileData.username}</h1>
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">{profileData.username || 'Loading...'}</h1>
                 <p className="text-neutral-500 dark:text-neutral-400 flex items-center mt-1">
                   <Mail className="w-4 h-4 mr-1.5" />
                   {profileData.email}
@@ -88,7 +134,7 @@ export default function ProfilePage() {
                     : 'border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                 }`}
               >
-                Order History
+                Order History ({orders.length})
               </button>
             </div>
 
@@ -172,18 +218,35 @@ export default function ProfilePage() {
 
               {activeTab === 'orders' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-4">
-                      <Package className="w-8 h-8 text-indigo-500" />
+                  {orders.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-4">
+                        <Package className="w-8 h-8 text-indigo-500" />
+                      </div>
+                      <h3 className="text-lg font-medium text-neutral-900 dark:text-white">No orders yet</h3>
+                      <p className="text-neutral-500 dark:text-neutral-400 mt-1 max-w-sm">
+                        When you buy something for your furry friend, it will show up here.
+                      </p>
+                      <button onClick={() => router.push('/shop')} className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                        Start Shopping
+                      </button>
                     </div>
-                    <h3 className="text-lg font-medium text-neutral-900 dark:text-white">No orders yet</h3>
-                    <p className="text-neutral-500 dark:text-neutral-400 mt-1 max-w-sm">
-                      When you buy something for your furry friend, it will show up here.
-                    </p>
-                    <button className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                      Start Shopping
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders.map(order => (
+                        <div key={order._id} className="p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-neutral-900 dark:text-white">Order #{order._id.substring(order._id.length - 8)}</p>
+                            <p className="text-sm text-neutral-500 mt-1">Date: {new Date(order.order_date).toLocaleDateString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-indigo-600 dark:text-indigo-400">${order.total_amou.toFixed(2)}</p>
+                            <button onClick={() => router.push('/track-order')} className="text-sm text-neutral-500 hover:text-indigo-600 hover:underline mt-1 block">Track Order</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>
