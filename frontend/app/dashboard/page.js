@@ -18,8 +18,13 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (status === 'loading') return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('petzio_token') : null;
+    if (status === 'unauthenticated' && !token) {
       router.push('/auth/signin');
+    } else if (status === 'unauthenticated' && token) {
+      // Custom signup/login user, redirect to profile where real DB orders are displayed
+      router.push('/profile');
     }
   }, [status, router]);
 

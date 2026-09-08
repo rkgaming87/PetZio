@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import Script from 'next/script';
 
+import api from '@/lib/api';
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -76,11 +78,30 @@ export default function CheckoutPage() {
         name: 'PetZio',
         description: 'Test Transaction',
         order_id: order.id,
-        handler: function (response) {
+        handler: async function (response) {
           toast.dismiss();
           toast.success('Payment successful!');
+          
+          let createdOrderId = null;
+          try {
+            const orderRes = await api.post('/orders', {
+              items: cart,
+              total_amou: total,
+              pay_method: 'card'
+            });
+            if (orderRes.data && orderRes.data._id) {
+              createdOrderId = orderRes.data._id;
+            }
+          } catch (err) {
+            console.error('Failed to record order in backend database:', err);
+          }
+
           clearCart();
-          router.push('/order-confirmation');
+          if (createdOrderId) {
+            router.push(`/order-confirmation?orderId=${createdOrderId}`);
+          } else {
+            router.push('/order-confirmation');
+          }
         },
         prefill: {
           name: shippingInfo.fullName,

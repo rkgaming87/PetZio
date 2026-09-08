@@ -113,7 +113,7 @@ export default function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
+                    <Link href="/profile?tab=orders" className="cursor-pointer">
                       <Package className="mr-2 h-4 w-4" />
                       My Orders
                     </Link>
