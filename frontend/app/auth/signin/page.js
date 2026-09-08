@@ -27,8 +27,13 @@ export default function SignInPage() {
   const [signUpForm, setSignUpForm] = useState({
     name: '',
     email: '',
+    phone: '',
+    address: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    shopName: '',
+    shopDescription: '',
+    shopAddress: ''
   });
 
   const handleSignIn = async (e) => {
@@ -71,19 +76,28 @@ export default function SignInPage() {
     }
 
     try {
-      const response = await api.post('/auth/register', {
+      const isVendor = accountType === 'vendor';
+      const payload = {
         username: signUpForm.name,
         email: signUpForm.email,
         password: signUpForm.password,
-        role: accountType === 'vendor' ? 'vendor' : 'user',
-        cont_num: '0000000000', // Default placeholder
-        address: 'No Address Provided', // Default placeholder
-      });
+        role: isVendor ? 'vendor' : 'user',
+        cont_num: signUpForm.phone || '0000000000',
+        address: signUpForm.address || 'No Address Provided',
+      };
+
+      if (isVendor) {
+        payload.shop_name = signUpForm.shopName || `${signUpForm.name}'s Pet Shop`;
+        payload.shop_des = signUpForm.shopDescription || 'Pet supplies & accessories vendor';
+        payload.shop_add = signUpForm.shopAddress || signUpForm.address || 'Vendor Main Address';
+      }
+
+      const response = await api.post('/auth/register', payload);
       
       const data = response.data;
       localStorage.setItem('petzio_token', data.token);
-      toast.success('Account created successfully! Welcome to PetZio!');
-      router.push('/');
+      toast.success(isVendor ? 'Vendor account created successfully!' : 'Account created successfully! Welcome to PetZio!');
+      router.push(isVendor ? '/vendor' : '/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to register');
       toast.error('Failed to create account');
@@ -220,6 +234,70 @@ export default function SignInPage() {
                       required
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-phone">Phone Number</Label>
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      placeholder="e.g. 9876543210"
+                      value={signUpForm.phone}
+                      onChange={(e) => setSignUpForm({ ...signUpForm, phone: e.target.value })}
+                      required={accountType === 'vendor'}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-address">Address</Label>
+                    <Input
+                      id="signup-address"
+                      placeholder="Street address"
+                      value={signUpForm.address}
+                      onChange={(e) => setSignUpForm({ ...signUpForm, address: e.target.value })}
+                      required={accountType === 'vendor'}
+                    />
+                  </div>
+
+                  {accountType === 'vendor' && (
+                    <>
+                      <div className="border-t pt-3 mt-3">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Shop Information</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="shop-name">Shop Name *</Label>
+                        <Input
+                          id="shop-name"
+                          placeholder="Paws & Claws Pet Care"
+                          value={signUpForm.shopName}
+                          onChange={(e) => setSignUpForm({ ...signUpForm, shopName: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="shop-desc">Shop Description *</Label>
+                        <Input
+                          id="shop-desc"
+                          placeholder="Premium pet supplies & grooming"
+                          value={signUpForm.shopDescription}
+                          onChange={(e) => setSignUpForm({ ...signUpForm, shopDescription: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="shop-add">Shop Address *</Label>
+                        <Input
+                          id="shop-add"
+                          placeholder="Store physical address"
+                          value={signUpForm.shopAddress}
+                          onChange={(e) => setSignUpForm({ ...signUpForm, shopAddress: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
