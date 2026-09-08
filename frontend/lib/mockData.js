@@ -1,11 +1,12 @@
 // Mock Data for PetZio Platform
 
 export const categories = [
-  { id: 'dog', name: 'Dog', icon: '🐕', color: '#FF8C42' },
-  { id: 'cat', name: 'Cat', icon: '🐱', color: '#4A90E2' },
-  { id: 'bird', name: 'Bird', icon: '🦜', color: '#10B981' },
-  { id: 'fish', name: 'Fish', icon: '🐠', color: '#06B6D4' },
-  { id: 'small-pets', name: 'Small Pets', icon: '🐹', color: '#F59E0B' }
+  { id: 'Food', name: 'Food', icon: '🦴', color: '#FF8C42' },
+  { id: 'Toys', name: 'Toys', icon: '🎾', color: '#4A90E2' },
+  { id: 'Accessories', name: 'Accessories', icon: '🎀', color: '#10B981' },
+  { id: 'Grooming', name: 'Grooming', icon: '🛁', color: '#06B6D4' },
+  { id: 'Bedding', name: 'Bedding', icon: '🛏️', color: '#F59E0B' },
+  { id: 'Health', name: 'Health', icon: '⚕️', color: '#EF4444' }
 ];
 
 export const products = [

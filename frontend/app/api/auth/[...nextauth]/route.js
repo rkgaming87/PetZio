@@ -12,6 +12,29 @@ export const authOptions = {
         role: { label: 'Role', type: 'text' }
       },
       async authorize(credentials) {
+        try {
+          const res = await fetch('http://localhost:5000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            return {
+              id: data._id,
+              email: data.email,
+              name: data.username,
+              role: data.role
+            };
+          }
+        } catch (e) {
+          console.error('NextAuth authorize DB lookup error:', e);
+        }
+
         const user = mockUsers.find(
           u => u.email === credentials.email && u.password === credentials.password
         );
@@ -33,6 +56,7 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.role = user.role;
         token.vendorId = user.vendorId;
       }
@@ -40,6 +64,7 @@ export const authOptions = {
     },
     async session({ session, token }) {
       if (session?.user) {
+        session.user.id = token.id;
         session.user.role = token.role;
         session.user.vendorId = token.vendorId;
       }

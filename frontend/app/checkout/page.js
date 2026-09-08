@@ -14,6 +14,7 @@ import { useCart } from '@/lib/CartContext';
 import { Check, CreditCard, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import Script from 'next/script';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -33,12 +34,7 @@ export default function CheckoutPage() {
     country: 'United States'
   });
 
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: ''
-  });
+
 
   const subtotal = getCartTotal();
   const tax = subtotal * 0.08;
@@ -51,16 +47,63 @@ export default function CheckoutPage() {
     toast.success('Shipping information saved');
   };
 
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
-    // Mock payment processing
-    toast.loading('Processing payment...');
-    setTimeout(() => {
+    
+    if (paymentMethod !== 'card') {
+      toast.error('Only Card (Razorpay) is supported in this demo.');
+      return;
+    }
+
+    toast.loading('Initializing payment...');
+    try {
+      const response = await fetch('http://localhost:5000/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: total })
+      });
+      
+      const order = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(order.message || 'Failed to create order');
+      }
+
+      const options = {
+        key: 'rzp_test_TZRhDDrBRkDqwe',
+        amount: order.amount,
+        currency: order.currency,
+        name: 'PetZio',
+        description: 'Test Transaction',
+        order_id: order.id,
+        handler: function (response) {
+          toast.dismiss();
+          toast.success('Payment successful!');
+          clearCart();
+          router.push('/order-confirmation');
+        },
+        prefill: {
+          name: shippingInfo.fullName,
+          email: 'demo@example.com',
+          contact: '9999999999' // Hardcoded demo number to prevent real SMS
+        },
+        theme: {
+          color: '#FF8C42'
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.on('payment.failed', function (response){
+        toast.dismiss();
+        toast.error('Payment failed: ' + response.error.description);
+      });
+      
       toast.dismiss();
-      toast.success('Order placed successfully!');
-      clearCart();
-      router.push('/order-confirmation');
-    }, 2000);
+      rzp1.open();
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error.message || 'Payment initialization failed');
+    }
   };
 
   if (cart.length === 0) {
@@ -85,6 +128,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
@@ -223,7 +267,7 @@ export default function CheckoutPage() {
                         <RadioGroupItem value="card" id="card" />
                         <Label htmlFor="card" className="flex items-center cursor-pointer flex-1">
                           <CreditCard className="mr-2 h-5 w-5" />
-                          Credit / Debit Card
+                          Pay with Razorpay (Cards / Netbanking / UPI)
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2 border rounded-lg p-4">
@@ -233,62 +277,15 @@ export default function CheckoutPage() {
                     </RadioGroup>
 
                     {paymentMethod === 'card' && (
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="cardNumber">Card Number *</Label>
-                          <Input
-                            id="cardNumber"
-                            placeholder="1234 5678 9012 3456"
-                            value={paymentInfo.cardNumber}
-                            onChange={(e) => setPaymentInfo({ ...paymentInfo, cardNumber: e.target.value })}
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="cardName">Cardholder Name *</Label>
-                          <Input
-                            id="cardName"
-                            placeholder="John Doe"
-                            value={paymentInfo.cardName}
-                            onChange={(e) => setPaymentInfo({ ...paymentInfo, cardName: e.target.value })}
-                            required
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="expiryDate">Expiry Date *</Label>
-                            <Input
-                              id="expiryDate"
-                              placeholder="MM/YY"
-                              value={paymentInfo.expiryDate}
-                              onChange={(e) => setPaymentInfo({ ...paymentInfo, expiryDate: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="cvv">CVV *</Label>
-                            <Input
-                              id="cvv"
-                              placeholder="123"
-                              maxLength={4}
-                              value={paymentInfo.cvv}
-                              onChange={(e) => setPaymentInfo({ ...paymentInfo, cvv: e.target.value })}
-                              required
-                            />
-                          </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start mb-4">
+                        <Lock className="h-5 w-5 text-blue-600 mr-3 mt-0.5" />
+                        <div className="text-sm text-blue-800">
+                          <p className="font-semibold mb-1">Secure Payment via Razorpay</p>
+                          <p>You will be redirected to Razorpay's secure checkout modal. <strong>For this demo, please select Netbanking</strong> if test cards are declined.</p>
                         </div>
                       </div>
                     )}
 
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start">
-                      <Lock className="h-5 w-5 text-blue-600 mr-3 mt-0.5" />
-                      <div className="text-sm text-blue-800">
-                        <p className="font-semibold mb-1">Secure Payment</p>
-                        <p>Your payment information is encrypted and secure. We never store your card details.</p>
-                      </div>
-                    </div>
 
                     <div className="flex gap-3">
                       <Button

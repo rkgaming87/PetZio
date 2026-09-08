@@ -151,7 +151,7 @@ export function ShopPage() {
                   )}
                 </div>
 
-                <Accordion type="multiple" defaultValue={['category', 'price', 'brand']}>
+                <Accordion type="multiple" defaultValue={['category', 'price']}>
                   {/* Category Filter */}
                   <AccordionItem value="category">
                     <AccordionTrigger>Category</AccordionTrigger>
@@ -200,59 +200,8 @@ export function ShopPage() {
                     </AccordionContent>
                   </AccordionItem>
 
-                  {/* Brand Filter */}
-                  <AccordionItem value="brand">
-                    <AccordionTrigger>Brand</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3">
-                        {brands.map((brand) => (
-                          <div key={brand} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`brand-${brand}`}
-                              checked={selectedBrands.includes(brand)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedBrands([...selectedBrands, brand]);
-                                } else {
-                                  setSelectedBrands(selectedBrands.filter(b => b !== brand));
-                                }
-                              }}
-                            />
-                            <Label htmlFor={`brand-${brand}`} className="cursor-pointer">
-                              {brand}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
 
-                  {/* Vendor Filter */}
-                  <AccordionItem value="vendor">
-                    <AccordionTrigger>Vendor</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3">
-                        {vendors.map((vendor) => (
-                          <div key={vendor.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`vendor-${vendor.id}`}
-                              checked={selectedVendors.includes(vendor.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedVendors([...selectedVendors, vendor.id]);
-                                } else {
-                                  setSelectedVendors(selectedVendors.filter(v => v !== vendor.id));
-                                }
-                              }}
-                            />
-                            <Label htmlFor={`vendor-${vendor.id}`} className="cursor-pointer">
-                              {vendor.name}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+
                 </Accordion>
               </div>
             </div>
@@ -277,27 +226,8 @@ export function ShopPage() {
                       </Badge>
                     );
                   })}
-                  {selectedBrands.map(brand => (
-                    <Badge key={brand} variant="secondary" className="flex items-center gap-1">
-                      {brand}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeFilter('brand', brand)}
-                      />
-                    </Badge>
-                  ))}
-                  {selectedVendors.map(vendorId => {
-                    const vendor = vendors.find(v => v.id === vendorId);
-                    return (
-                      <Badge key={vendorId} variant="secondary" className="flex items-center gap-1">
-                        {vendor?.name}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeFilter('vendor', vendorId)}
-                        />
-                      </Badge>
-                    );
-                  })}
+
+
                 </div>
               </div>
             )}
