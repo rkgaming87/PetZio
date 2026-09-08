@@ -62,8 +62,8 @@ export default function CheckoutPage() {
       const response = await api.post('/payment/create-order', { amount: total });
       const order = response.data;
       
-      if (!response.ok) {
-        throw new Error(order.message || 'Failed to create order');
+      if (!order || !order.id) {
+        throw new Error('Failed to create Razorpay order');
       }
 
       const options = {

@@ -12,8 +12,8 @@ router.post('/create-order', async (req, res) => {
     }
 
     const instance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_TZRhDDrBRkDqwe',
-      key_secret: process.env.RAZORPAY_KEY_SECRET || 'ql3IEYeBIo1GlBr495IYAk42',
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
     const options = {
