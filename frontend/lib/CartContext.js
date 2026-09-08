@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react';
 
 const CartContext = createContext();
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 function getUserIdFromToken() {
   if (typeof window === 'undefined') return null;
   const token = localStorage.getItem('petzio_token');
@@ -62,7 +64,7 @@ export function CartProvider({ children }) {
       try {
         if (userId) {
           // Fetch from database
-          const res = await fetch(`http://localhost:5000/api/cart/${userId}`);
+          const res = await fetch(`${API_BASE_URL}/cart/${userId}`);
           if (res.ok) {
             const data = await res.json();
             if (data.items && data.items.length > 0) {
@@ -106,8 +108,8 @@ export function CartProvider({ children }) {
       
       if (userId) {
         try {
-          console.log('Attempting fetch to:', `http://localhost:5000/api/cart/${userId}`);
-          const res = await fetch(`http://localhost:5000/api/cart/${userId}`, {
+          console.log('Attempting fetch to:', `${API_BASE_URL}/cart/${userId}`);
+          const res = await fetch(`${API_BASE_URL}/cart/${userId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: cart })

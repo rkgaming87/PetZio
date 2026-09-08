@@ -59,13 +59,8 @@ export default function CheckoutPage() {
 
     toast.loading('Initializing payment...');
     try {
-      const response = await fetch('http://localhost:5000/api/payment/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total })
-      });
-      
-      const order = await response.json();
+      const response = await api.post('/payment/create-order', { amount: total });
+      const order = response.data;
       
       if (!response.ok) {
         throw new Error(order.message || 'Failed to create order');
