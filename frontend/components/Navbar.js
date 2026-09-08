@@ -23,12 +23,32 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVendor, setIsVendor] = useState(false);
 
   useEffect(() => {
     // Check auth status on mount
     const checkAuth = () => {
       const token = localStorage.getItem('petzio_token');
       setIsAuthenticated(!!token);
+
+      if (token) {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const parsed = JSON.parse(jsonPayload);
+          setIsVendor(parsed.role === 'vendor');
+        } catch (e) {
+          setIsVendor(false);
+        }
+      } else {
+        setIsVendor(false);
+      }
     };
     
     checkAuth();
@@ -40,6 +60,7 @@ export default function Navbar() {
   const handleSignOut = () => {
     localStorage.removeItem('petzio_token');
     setIsAuthenticated(false);
+    setIsVendor(false);
     router.push('/');
   };
 
@@ -82,6 +103,15 @@ export default function Navbar() {
               <Button variant="ghost">Shop</Button>
             </Link>
 
+            {isVendor && (
+              <Link href="/vendor">
+                <Button style={{ backgroundColor: '#4A90E2' }} className="text-white hover:opacity-90 font-medium">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Vendor Dashboard
+                </Button>
+              </Link>
+            )}
+
             {/* Cart */}
             <Link href="/cart">
               <Button variant="ghost" className="relative">
@@ -106,6 +136,17 @@ export default function Navbar() {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  {isVendor && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/vendor" className="cursor-pointer font-semibold text-blue-600">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Vendor Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="cursor-pointer">
                       <User className="mr-2 h-4 w-4" />

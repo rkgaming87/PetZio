@@ -21,6 +21,7 @@ function ProfileContent() {
     email: '',
     phone: '',
     address: '',
+    role: ''
   });
 
   useEffect(() => {
@@ -43,6 +44,7 @@ function ProfileContent() {
         email: response.data.email || '',
         phone: response.data.cont_num || '',
         address: response.data.address || '',
+        role: response.data.role || ''
       });
     } catch (error) {
       if (error.response?.status === 401) {
@@ -110,19 +112,37 @@ function ProfileContent() {
         <div className="pt-16 pb-8 px-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">{profileData.username || 'Loading...'}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">{profileData.username || 'Loading...'}</h1>
+                {profileData.role === 'vendor' && (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                    Vendor
+                  </span>
+                )}
+              </div>
               <p className="text-neutral-500 dark:text-neutral-400 flex items-center mt-1">
                 <Mail className="w-4 h-4 mr-1.5" />
                 {profileData.email}
               </p>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-950/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </button>
+            <div className="flex gap-3">
+              {profileData.role === 'vendor' && (
+                <button
+                  onClick={() => router.push('/vendor')}
+                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  Vendor Dashboard
+                </button>
+              )}
+              <button 
+                onClick={handleLogout}
+                className="flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-950/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
